@@ -1,0 +1,5 @@
+name=Box2D Lite C Demo
+author=Timofffee
+description=A small demo of the C API
+bundleID=com.rtdxe.box2dlite
+imagePath=
