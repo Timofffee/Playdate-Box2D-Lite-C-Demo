@@ -1,13 +1,13 @@
 /*
-* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
-*
-* Permission to use, copy, modify, distribute and sell this software
-* and its documentation for any purpose is hereby granted without fee,
-* provided that the above copyright notice appear in all copies.
-* Erin Catto makes no representations about the suitability 
-* of this software for any purpose.  
-* It is provided "as is" without express or implied warranty.
-*/
+ * Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
+ *
+ * Permission to use, copy, modify, distribute and sell this software
+ * and its documentation for any purpose is hereby granted without fee,
+ * provided that the above copyright notice appear in all copies.
+ * Erin Catto makes no representations about the suitability
+ * of this software for any purpose.
+ * It is provided "as is" without express or implied warranty.
+ */
 
 #include <stdio.h>
 #include <float.h>
@@ -22,8 +22,8 @@ struct Arbiter
 	struct Contact contacts[2];
 	int numContacts;
 
-	struct Body* body1;
-	struct Body* body2;
+	struct Body *body1;
+	struct Body *body2;
 
 	// Combined friction
 	float friction;
@@ -31,8 +31,8 @@ struct Arbiter
 
 struct ArbiterKey
 {
-	struct Body* body1;
-	struct Body* body2;
+	struct Body *body1;
+	struct Body *body2;
 };
 
 // was in World
@@ -50,68 +50,69 @@ int accumulateImpulses = 1;
 int warmStarting = 1;
 int positionCorrection = 1;
 
-struct Arbiter* findArbiter(struct ArbiterKey key)
+struct Arbiter *findArbiter(struct ArbiterKey key)
 {
-    for (int i=0; i<g_numArbiters; i++)
-    {    
-        if (g_arbiterKeys[i].body1 == key.body1 && 
-            g_arbiterKeys[i].body2 == key.body2)
-           return &g_arbiters[i];
-    }
+	for (int i = 0; i < g_numArbiters; i++)
+	{
+		if (g_arbiterKeys[i].body1 == key.body1 &&
+			g_arbiterKeys[i].body2 == key.body2)
+			return &g_arbiters[i];
+	}
 
-    return NULL;
+	return NULL;
 }
 
 void insertArbiter(struct ArbiterKey key, struct Arbiter value)
 {
-    if (g_numArbiters >= 100)    
-    {
-        // printf("Exceeded max number of arbiters!\n");
-        // exit(1);
-    }
-    
-    g_arbiterKeys[g_numArbiters]=key;
-    g_arbiters[g_numArbiters]=value;
-    g_numArbiters++;
+	if (g_numArbiters >= 100)
+	{
+		return;
+	}
+	else
+	{
+		g_arbiterKeys[g_numArbiters] = key;
+		g_arbiters[g_numArbiters] = value;
+		g_numArbiters++;
+	}
 }
 
 void eraseArbiter(struct ArbiterKey key)
 {
-    for (int i=0; i < g_numArbiters; i++)
-    {    
-        if (g_arbiterKeys[i].body1 == key.body1 && 
-            g_arbiterKeys[i].body2 == key.body2)
-        {
-            for (int j=i; j < g_numArbiters-1; j++)
-            {
-                g_arbiterKeys[j]=g_arbiterKeys[j+1];
-                g_arbiters[j]=g_arbiters[j+1];
-            }
-            g_numArbiters--;
-        }
-    }                                        
+	for (int i = 0; i < g_numArbiters; i++)
+	{
+		if (g_arbiterKeys[i].body1 == key.body1 &&
+			g_arbiterKeys[i].body2 == key.body2)
+		{
+			for (int j = i; j < g_numArbiters - 1; j++)
+			{
+				g_arbiterKeys[j] = g_arbiterKeys[j + 1];
+				g_arbiters[j] = g_arbiters[j + 1];
+			}
+			g_numArbiters--;
+		}
+	}
 }
 
 void initContact(struct Contact *c)
 {
-    c->Pn=0.0f;
-    c->Pt=0.0f;
-    c->Pnb=0.0f;
+	c->Pn = 0.0f;
+	c->Pt = 0.0f;
+	c->Pnb = 0.0f;
 }
 
-void UpdateArbiter(struct Arbiter *a, struct Contact* newContacts, int numNewContacts)
+void UpdateArbiter(struct Arbiter *a, struct Contact *newContacts, int numNewContacts)
 {
 	struct Contact mergedContacts[2];
-    initContact(&mergedContacts[0]);
-    initContact(&mergedContacts[1]);
+	initContact(&mergedContacts[0]);
+	initContact(&mergedContacts[1]);
 
 	for (int i = 0; i < numNewContacts; ++i)
 	{
-		struct Contact* cNew = newContacts + i;
+		struct Contact *cNew = newContacts + i;
 		int k = -1;
 		for (int j = 0; j < a->numContacts; ++j)
 		{
-			struct Contact* cOld = a->contacts + j;
+			struct Contact *cOld = a->contacts + j;
 			if (cNew->feature.value == cOld->feature.value)
 			{
 				k = j;
@@ -121,8 +122,8 @@ void UpdateArbiter(struct Arbiter *a, struct Contact* newContacts, int numNewCon
 
 		if (k > -1)
 		{
-			struct Contact* c = mergedContacts + i;
-			struct Contact* cOld = a->contacts + k;
+			struct Contact *c = mergedContacts + i;
+			struct Contact *cOld = a->contacts + k;
 			*c = *cNew;
 			if (warmStarting)
 			{
@@ -149,62 +150,61 @@ void UpdateArbiter(struct Arbiter *a, struct Contact* newContacts, int numNewCon
 	a->numContacts = numNewContacts;
 }
 
-
 void BroadPhase()
 {
-    for (int i=0; i< g_numBodies; i++)
-    {
-        struct Body* bi = g_bodies[i];
-        
-        for (int j=i+1; j < g_numBodies; j++)
-        {
-            struct Body* bj = g_bodies[j];
+	for (int i = 0; i < g_numBodies; i++)
+	{
+		struct Body *bi = g_bodies[i];
 
-            if (bi->invMass == 0.0f && bj->invMass == 0.0f)
-                continue;
+		for (int j = i + 1; j < g_numBodies; j++)
+		{
+			struct Body *bj = g_bodies[j];
 
-            struct Arbiter newArb;
-            struct ArbiterKey key;
+			if (bi->invMass == 0.0f && bj->invMass == 0.0f)
+				continue;
 
-            if (bi<bj)
-            {
-                newArb.body1=bi;
-                newArb.body2=bj;
-                key.body1=bi;
-                key.body2=bj;    
-            }
-            else
-            {
-                newArb.body1=bj;
-                newArb.body2=bi;
-                key.body1=bj;
-                key.body2=bi;
-            }
+			struct Arbiter newArb;
+			struct ArbiterKey key;
 
-            initContact(&newArb.contacts[0]);
-            initContact(&newArb.contacts[1]);
-            
-            newArb.numContacts = Collide(newArb.contacts, newArb.body1, newArb.body2);  
-            newArb.friction = sqrtf(newArb.body1->friction * newArb.body2->friction);
-            
-            if (newArb.numContacts > 0)
-            {
-                struct Arbiter *a = findArbiter(key);
-                if (a == NULL)
-                {
-                    insertArbiter(key, newArb);
-                }
-                else
-                {
-                    UpdateArbiter(a, newArb.contacts, newArb.numContacts);
-                }
-            }
-            else
-            {
-                eraseArbiter(key);
-            }
-        }
-    }      
+			if (bi < bj)
+			{
+				newArb.body1 = bi;
+				newArb.body2 = bj;
+				key.body1 = bi;
+				key.body2 = bj;
+			}
+			else
+			{
+				newArb.body1 = bj;
+				newArb.body2 = bi;
+				key.body1 = bj;
+				key.body2 = bi;
+			}
+
+			initContact(&newArb.contacts[0]);
+			initContact(&newArb.contacts[1]);
+
+			newArb.numContacts = Collide(newArb.contacts, newArb.body1, newArb.body2);
+			newArb.friction = sqrtf(newArb.body1->friction * newArb.body2->friction);
+
+			if (newArb.numContacts > 0)
+			{
+				struct Arbiter *a = findArbiter(key);
+				if (a == NULL)
+				{
+					insertArbiter(key, newArb);
+				}
+				else
+				{
+					UpdateArbiter(a, newArb.contacts, newArb.numContacts);
+				}
+			}
+			else
+			{
+				eraseArbiter(key);
+			}
+		}
+	}
 }
 
 void PreStep(struct Arbiter *a, float inv_dt)
@@ -214,7 +214,7 @@ void PreStep(struct Arbiter *a, float inv_dt)
 
 	for (int i = 0; i < a->numContacts; ++i)
 	{
-		struct Contact* c = a->contacts + i;
+		struct Contact *c = a->contacts + i;
 
 		struct Vec2 r1 = diffVec2(c->position, a->body1->position);
 		struct Vec2 r2 = diffVec2(c->position, a->body2->position);
@@ -231,7 +231,7 @@ void PreStep(struct Arbiter *a, float inv_dt)
 		float rt2 = Dot(r2, tangent);
 		float kTangent = a->body1->invMass + a->body2->invMass;
 		kTangent += a->body1->invI * (Dot(r1, r1) - rt1 * rt1) + a->body2->invI * (Dot(r2, r2) - rt2 * rt2);
-		c->massTangent = 1.0f /  kTangent;
+		c->massTangent = 1.0f / kTangent;
 
 		c->bias = -k_biasFactor * inv_dt * Min(0.0f, c->separation + k_allowedPenetration);
 
@@ -251,18 +251,18 @@ void PreStep(struct Arbiter *a, float inv_dt)
 
 void ApplyImpulse(struct Arbiter *a)
 {
-	struct Body* b1 = a->body1;
-	struct Body* b2 = a->body2;
+	struct Body *b1 = a->body1;
+	struct Body *b2 = a->body2;
 
 	for (int i = 0; i < a->numContacts; ++i)
 	{
-		struct Contact* c = a->contacts + i;
+		struct Contact *c = a->contacts + i;
 		c->r1 = diffVec2(c->position, b1->position);
 		c->r2 = diffVec2(c->position, b2->position);
 
 		// Relative velocity at contact
 		struct Vec2 dv = diffVec2(sumVec2(b2->velocity, Crosssv(b2->angularVelocity, c->r2)),
-                                  sumVec2(b1->velocity, Crosssv(b1->angularVelocity, c->r1)));
+								  sumVec2(b1->velocity, Crosssv(b1->angularVelocity, c->r1)));
 
 		// Compute normal impulse
 		float vn = Dot(dv, c->normal);
@@ -284,15 +284,15 @@ void ApplyImpulse(struct Arbiter *a)
 		// Apply contact impulse
 		struct Vec2 Pn = scaledVec2(dPn, c->normal);
 
-        subfromVec2(&b1->velocity, scaledVec2(b1->invMass, Pn));
+		subfromVec2(&b1->velocity, scaledVec2(b1->invMass, Pn));
 		b1->angularVelocity -= b1->invI * Crossvv(c->r1, Pn);
 
-        addtoVec2(&b2->velocity, scaledVec2(b2->invMass, Pn));
+		addtoVec2(&b2->velocity, scaledVec2(b2->invMass, Pn));
 		b2->angularVelocity += b2->invI * Crossvv(c->r2, Pn);
 
 		// Relative velocity at contact
 		dv = diffVec2(sumVec2(b2->velocity, Crosssv(b2->angularVelocity, c->r2)),
-                      sumVec2(b1->velocity, Crosssv(b1->angularVelocity, c->r1)));
+					  sumVec2(b1->velocity, Crosssv(b1->angularVelocity, c->r1)));
 
 		struct Vec2 tangent = Crossvs(c->normal, 1.0f);
 		float vt = Dot(dv, tangent);
@@ -335,7 +335,7 @@ void Step(float dt)
 	// Integrate forces.
 	for (int i = 0; i < g_numBodies; ++i)
 	{
-		struct Body* b = g_bodies[i];
+		struct Body *b = g_bodies[i];
 
 		if (b->invMass == 0.0f)
 			continue;
@@ -345,49 +345,49 @@ void Step(float dt)
 	}
 
 	// Perform pre-steps.
-    
-    for (int i=0; i < g_numArbiters; i++)
-    {
-        PreStep(&g_arbiters[i], inv_dt);
-    }
+
+	for (int i = 0; i < g_numArbiters; i++)
+	{
+		PreStep(&g_arbiters[i], inv_dt);
+	}
 
 	// Perform iterations
 	for (int it = 0; it < iterations; ++it)
 	{
-        for (int i=0; i < g_numArbiters; i++)
-            ApplyImpulse(&g_arbiters[i]);
+		for (int i = 0; i < g_numArbiters; i++)
+			ApplyImpulse(&g_arbiters[i]);
 	}
 
 	// Integrate Velocities
 	for (int i = 0; i < g_numBodies; ++i)
 	{
-		struct Body* b = g_bodies[i];
+		struct Body *b = g_bodies[i];
 
 		addtoVec2(&b->position, scaledVec2(dt, b->velocity));
 		b->rotation += dt * b->angularVelocity;
 
-		b->force.x=0;
-		b->force.y=0;
+		b->force.x = 0;
+		b->force.y = 0;
 		b->torque = 0.0f;
 	}
 }
 
-void initBody(struct Body* b, struct Vec2 w, float m)
+void initBody(struct Body *b, struct Vec2 w, float m)
 {
-        
-    b->position.x=0;
-    b->position.y=0;
-    b->rotation=0;
-    b->velocity.x=0;
-    b->velocity.y=0;
-    b->angularVelocity=0;
-    b->force.x=0;
-    b->force.y=0;
-    b->torque=0.0f;
-    b->friction=0.2f;
 
-    b->width = w;
-    b->mass = m;
+	b->position.x = 0;
+	b->position.y = 0;
+	b->rotation = 0;
+	b->velocity.x = 0;
+	b->velocity.y = 0;
+	b->angularVelocity = 0;
+	b->force.x = 0;
+	b->force.y = 0;
+	b->torque = 0.0f;
+	b->friction = 0.2f;
+
+	b->width = w;
+	b->mass = m;
 
 	if (b->mass < FLT_MAX)
 	{
@@ -401,15 +401,15 @@ void initBody(struct Body* b, struct Vec2 w, float m)
 		b->I = FLT_MAX;
 		b->invI = 0.0f;
 	}
-}    
+}
 
 void addBody(struct Body *b)
 {
-    g_bodies[g_numBodies]=b;
-    g_numBodies++;
+	g_bodies[g_numBodies] = b;
+	g_numBodies++;
 }
 
-struct Body* getBody(int i)
+struct Body *getBody(int i)
 {
-    return g_bodies[i];
+	return g_bodies[i];
 }
